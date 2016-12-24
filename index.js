@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+console.log('something');
+
 mongoose.connect('mongodb://localhost/mydatabase', {});
 
 const dynamicModel =  require('./dynamic.model');
