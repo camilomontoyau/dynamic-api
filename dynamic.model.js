@@ -10,10 +10,3 @@ const dynamicSchema = Schema(
 module.exports = function (collectionName) {
  return mongoose.model(collectionName, dynamicSchema);
 };
-
-
-
-
-
-
- 
