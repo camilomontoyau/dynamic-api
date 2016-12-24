@@ -69,8 +69,6 @@ router.delete('/:collectionName/:documentId', function (req, res) {
   });
 });
 
-
-
 app.use('/api/v1', router);
 
 app.listen(3000);
