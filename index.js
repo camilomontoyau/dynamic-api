@@ -27,10 +27,43 @@ router.get('/:collectionName', function (req, res) {
     queryDb = req.query;
   }
   
-  dynamicModel(req.params.collectionName).find(queryDb, function (err, docs) {
-    if(err) throw err;
-    res.status(200).json(docs);
-  });
+  console.log(queryDb);
+  
+  if(queryDb.product) {
+    queryDb.product = parseInt(req.query.product);
+  }
+  
+  
+  
+  let limit = 100;
+  let skip = 0;
+  let fields = {};
+  let sort = {};
+  
+  if(queryDb.limit && parseInt(queryDb.limit) < 100){
+    limit = parseInt(queryDb.limit)
+    delete queryDb.limit;
+  }
+  
+  if(queryDb.skip && parseInt(queryDb.skip) > 0) {
+    skip = parseInt(queryDb.skip);
+    delete queryDb.skip;
+  }
+  
+  if(queryDb.sort) {
+    sort = queryDb.sort;
+    delete queryDb.sort;
+  }
+  
+  
+  dynamicModel(req.params.collectionName).find(queryDb, fields)
+    .limit(limit)
+    .skip(skip)
+    .sort(sort)
+    .exec(function (err, docs) {
+      if(err) throw err;
+      res.status(200).json(docs);
+    });
 });
 
 router.get('/:collectionName/:documentId', function (req, res) {
@@ -73,4 +106,4 @@ router.delete('/:collectionName/:documentId', function (req, res) {
 
 app.use('/api/v1', router);
 
-app.listen(3000);
+app.listen(9000);
