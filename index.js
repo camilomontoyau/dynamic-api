@@ -23,16 +23,15 @@ router.get('/', function (req, res) {
 router.get('/:collectionName', function (req, res) {
   let queryDb = {};
   
-  if(req.query){
+  if (req.query) {
     queryDb = req.query;
   }
   
   console.log(queryDb);
   
-  if(queryDb.product) {
+  if (queryDb.product) {
     queryDb.product = parseInt(req.query.product);
   }
-  
   
   
   let limit = 100;
@@ -40,31 +39,50 @@ router.get('/:collectionName', function (req, res) {
   let fields = {};
   let sort = {};
   
-  if(queryDb.limit && parseInt(queryDb.limit) < 100){
+  if (queryDb.limit && parseInt(queryDb.limit) < 100) {
     limit = parseInt(queryDb.limit)
     delete queryDb.limit;
   }
   
-  if(queryDb.skip && parseInt(queryDb.skip) > 0) {
+  if (queryDb.skip && parseInt(queryDb.skip) > 0) {
     skip = parseInt(queryDb.skip);
     delete queryDb.skip;
   }
   
-  if(queryDb.sort) {
+  if (queryDb.sort) {
     sort = queryDb.sort;
     delete queryDb.sort;
   }
   
+  dynamicModel(req.params.collectionName).count(queryDb, function (err1, c) {
+    if(err1){
+      return res.status(500).json({
+        status: 500,
+        success: false,
+        error: {message: 'error counting', err: err1}
+      });
+    }
+    dynamicModel(req.params.collectionName).find(queryDb, fields)
+      .limit(limit)
+      .skip(skip)
+      .sort(sort)
+      .exec(function (err2, docs) {
+        if (err2) {
+          return res.status(500).json({
+            status: 500,
+            success: false,
+            error: {message: 'error finding', err: err2}
+          });
+        }
+        return res.status(200).json({
+          status: 200,
+          success: true,
+          error: null,
+          data: docs
+        });
+      });
+  });
   
-  dynamicModel(req.params.collectionName).find(queryDb, fields)
-    .limit(limit)
-    .skip(skip)
-    .sort(sort)
-    .exec(function (err, docs) {
-      if(err) throw err;
-      res.status(200).json(docs);
-    });
-});
 
 router.get('/:collectionName/:documentId', function (req, res) {
   dynamicModel(req.params.collectionName).findById(req.params.documentId, function (err, doc) {
