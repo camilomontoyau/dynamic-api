@@ -54,8 +54,8 @@ router.get('/:collectionName', function (req, res) {
     delete queryDb.sort;
   }
   
-  dynamicModel(req.params.collectionName).count(queryDb, function (err1, c) {
-    if(err1){
+  dynamicModel(req.params.collectionName).count(queryDb, function (err1, count) {
+    if (err1) {
       return res.status(500).json({
         status: 500,
         success: false,
@@ -78,12 +78,14 @@ router.get('/:collectionName', function (req, res) {
           status: 200,
           success: true,
           error: null,
-          data: docs
+          data: docs,
+          total: count
         });
       });
   });
+});
   
-
+  
 router.get('/:collectionName/:documentId', function (req, res) {
   dynamicModel(req.params.collectionName).findById(req.params.documentId, function (err, doc) {
     if(err) throw err;
