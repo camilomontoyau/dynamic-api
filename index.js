@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 console.log('something');
 
-mongoose.connect('mongodb://localhost/mydatabase', {});
+mongoose.connect(`mongodb://${process.env.db}/dynamic-api`, {});
 
 const dynamicModel =  require('./dynamic.model');
 
