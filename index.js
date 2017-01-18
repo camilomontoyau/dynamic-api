@@ -74,13 +74,19 @@ router.get('/:collectionName', function (req, res) {
             error: {message: 'error finding', err: err2}
           });
         }
-        return res.status(200).json({
+        
+        let result = {
           status: 200,
           success: true,
           error: null,
-          data: docs,
-          total: count
-        });
+          data: docs
+        };
+        
+        if(count > 0){
+          result.total = count;
+        }
+        
+        return res.status(200).json(result);
       });
   });
 });
