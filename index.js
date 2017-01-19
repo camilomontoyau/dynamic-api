@@ -39,12 +39,12 @@ router.get('/:collectionName', function (req, res) {
   let fields = {};
   let sort = {};
   
-  if (queryDb.limit && parseInt(queryDb.limit) < 100) {
+  if (queryDb.limit && parseInt(queryDb.limit) <= 100) {
     limit = parseInt(queryDb.limit)
     delete queryDb.limit;
   }
   
-  if (queryDb.skip && parseInt(queryDb.skip) > 0) {
+  if (queryDb.skip && parseInt(queryDb.skip) >= 0) {
     skip = parseInt(queryDb.skip);
     delete queryDb.skip;
   }
@@ -53,6 +53,11 @@ router.get('/:collectionName', function (req, res) {
     sort = queryDb.sort;
     delete queryDb.sort;
   }
+  
+  console.log('limit', limit);
+  console.log('skip', skip);
+  console.log('fields', fields);
+  console.log('sort', sort);
   
   dynamicModel(req.params.collectionName).count(queryDb, function (err1, count) {
     if (err1) {
