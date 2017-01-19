@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 console.log('something');
 
-mongoose.connect('mongodb://localhost/mydatabase', {});
+mongoose.connect(`mongodb://${process.env.db}/dynamic-api`, {});
 
 const dynamicModel =  require('./dynamic.model');
 
@@ -23,16 +23,80 @@ router.get('/', function (req, res) {
 router.get('/:collectionName', function (req, res) {
   let queryDb = {};
   
-  if(req.query){
+  if (req.query) {
     queryDb = req.query;
   }
   
-  dynamicModel(req.params.collectionName).find(queryDb, function (err, docs) {
-    if(err) throw err;
-    res.status(200).json(docs);
+  console.log(queryDb);
+  
+  if (queryDb.product) {
+    queryDb.product = parseInt(req.query.product);
+  }
+  
+  
+  let limit = 100;
+  let skip = 0;
+  let fields = {};
+  let sort = {};
+  
+  if (queryDb.limit && parseInt(queryDb.limit) <= 100) {
+    limit = parseInt(queryDb.limit)
+    delete queryDb.limit;
+  }
+  
+  if (queryDb.skip && parseInt(queryDb.skip) >= 0) {
+    skip = parseInt(queryDb.skip);
+    delete queryDb.skip;
+  }
+  
+  if (queryDb.sort) {
+    sort = queryDb.sort;
+    delete queryDb.sort;
+  }
+  
+  console.log('limit', limit);
+  console.log('skip', skip);
+  console.log('fields', fields);
+  console.log('sort', sort);
+  
+  dynamicModel(req.params.collectionName).count(queryDb, function (err1, count) {
+    if (err1) {
+      return res.status(500).json({
+        status: 500,
+        success: false,
+        error: {message: 'error counting', err: err1}
+      });
+    }
+    dynamicModel(req.params.collectionName).find(queryDb, fields)
+      .limit(limit)
+      .skip(skip)
+      .sort(sort)
+      .exec(function (err2, docs) {
+        if (err2) {
+          return res.status(500).json({
+            status: 500,
+            success: false,
+            error: {message: 'error finding', err: err2}
+          });
+        }
+        
+        let result = {
+          status: 200,
+          success: true,
+          error: null,
+          data: docs
+        };
+        
+        if(count > 0){
+          result.total = count;
+        }
+        
+        return res.status(200).json(result);
+      });
   });
 });
-
+  
+  
 router.get('/:collectionName/:documentId', function (req, res) {
   dynamicModel(req.params.collectionName).findById(req.params.documentId, function (err, doc) {
     if(err) throw err;
@@ -73,4 +137,4 @@ router.delete('/:collectionName/:documentId', function (req, res) {
 
 app.use('/api/v1', router);
 
-app.listen(3000);
+app.listen(9000);
